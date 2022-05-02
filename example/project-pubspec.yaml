@@ -1,0 +1,7 @@
+name: project
+dependencies: 
+  package2: ^2.2.2
+  package3: ^1.2.5
+  package1: ^2.3.2
+other_stuff: 
+  config: foo

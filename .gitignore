@@ -32,6 +32,8 @@ build/
 fastlane/report.xml
 .release-notes
 
+*.bak
+
 # Android related
 **/android/**/gradle-wrapper.jar
 **/android/.gradle

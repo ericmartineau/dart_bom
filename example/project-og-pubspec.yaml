@@ -1,0 +1,11 @@
+## Gets rid of comments
+name: project
+dependencies: 
+  package1:
+    path: ../package1
+  package2:
+    git:
+      url: git@github.com:munificent/cats.git
+      path: path/to/kittens
+
+  package3: ^1.2.5
