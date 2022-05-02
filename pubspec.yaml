@@ -1,5 +1,5 @@
 name: dart_bom
-description: A new Flutter package project.
+description: A utility for syncing dependencies across projects
 version: 1.2.0
 homepage: https://github.com/ericmartineau/dart_bom.git
 
@@ -8,17 +8,14 @@ environment:
   flutter: ">=1.17.0"
 
 executables:
-  dart_bom:
+  sync_pubspec:
 
 dependencies:
-  flutter:
-    sdk: flutter
   args: ^2.3.0
   path: ^1.8.0
   pubspec: ^2.1.0
 
 dev_dependencies:
   lint: ^1.8.2
-  flutter_test:
-    sdk: flutter
-
+  test: ^1.21.1
+  pub_semver: ^2.1.1
