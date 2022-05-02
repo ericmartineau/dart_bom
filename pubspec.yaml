@@ -4,10 +4,10 @@ version: 1.3.0
 homepage: https://github.com/ericmartineau/dart_bom.git
 
 environment:
-  sdk: ">=2.16.2 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 executables:
-  dart_bom:
+  syncbom: syncbom
 
 dependencies:
   args: ^2.3.0

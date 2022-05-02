@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:dart_bom/dart_bom.dart';
 
-Future main(List<String> arguments) async {
+Future main(List<String> arguments) {
   final ArgParser argParser = ArgParser();
 
   argParser.addOption("source", abbr: "s", help: 'The path to the source file');
@@ -39,21 +39,28 @@ Future main(List<String> arguments) async {
     exit(1);
   }
 
-  try {
-    var options = DartBomOptions(
-        source: args.get('source'),
-        target: args.get('target'),
-        writeFiles: args.get('write'),
-        backupFiles: args.get('no-backed') != true,
-        overwritePathDependencies: args.get('overwrite-path'),
-        overwriteDependencyOverrides: args.get('overwrite-overrides'));
+  var options = DartBomOptions(
+      source: args.get('source'),
+      target: args.get('target'),
+      writeFiles: args.get('write'),
+      backupFiles: args.get('no-backed') != true,
+      overwritePathDependencies: args.get('overwrite-path'),
+      overwriteDependencyOverrides: args.get('overwrite-overrides'));
 
-    if (File(options.target).existsSync()) {
-      print('The destination file pubspec.yaml does not exist');
-      exit(1);
+  if (File(options.target).existsSync()) {
+    print('The destination file pubspec.yaml does not exist');
+    exit(1);
+  }
+  return syncPubspecFiles(options).catchError((e, stack) {
+    if (e is DartBomException) {
+      print(e.message);
+      exit(e.exitCode);
+    } else {
+      print("Unknown error $e");
+      print(stack);
+      exit(9);
     }
-    ;
-    var result = await syncPubspecFiles(options);
+  }).then((result) {
     var mismatches = result.mismatches;
     var skipped = result.skipped;
     var matches = result.matches;
@@ -76,16 +83,7 @@ Future main(List<String> arguments) async {
     if (matches.isNotEmpty) {
       print("  MATCHES: ${matches.map((e) => e.package).join(', ')}");
     }
-  } catch (e, stack) {
-    if (e is DartBomException) {
-      print(e.message);
-      exit(e.exitCode);
-    } else {
-      print("Unknown error $e");
-      print(stack);
-      exit(9);
-    }
-  }
+  });
 }
 
 extension on ArgResults {
