@@ -1,0 +1,12 @@
+name: dart_bom
+
+packages:
+  - '*'
+
+
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+  version:
+    updateGitTagRefs: true

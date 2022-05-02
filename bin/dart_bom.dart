@@ -6,10 +6,15 @@ import 'package:dart_bom/dart_bom.dart';
 Future main(List<String> arguments) async {
   final ArgParser argParser = ArgParser();
 
-  argParser.addOption("source", abbr: "s");
-  argParser.addOption("target", abbr: "t", defaultsTo: './pubspec.yaml');
-  argParser.addFlag("write", abbr: "w");
-  argParser.addFlag("no-backup", abbr: "b");
+  argParser.addOption("source", abbr: "s", help: 'The path to the source file');
+  argParser.addOption("target",
+      abbr: "t",
+      defaultsTo: './pubspec.yaml',
+      help: 'The path to the target file');
+  argParser.addFlag("write",
+      abbr: "w", defaultsTo: false, help: 'Whether to write the files');
+  argParser.addFlag("no-backup",
+      abbr: "b", defaultsTo: false, help: 'Skip backing up target files');
   argParser.addFlag("overwrite-path",
       abbr: "p",
       help: 'Overwrites path dependencies.  By default, this is off',
@@ -30,17 +35,25 @@ Future main(List<String> arguments) async {
   }
 
   if (args['source'] == null) {
+    print('You must provide a source file');
     exit(1);
   }
 
   try {
-    var result = await syncPubspecFiles(DartBomOptions(
+    var options = DartBomOptions(
         source: args.get('source'),
         target: args.get('target'),
         writeFiles: args.get('write'),
         backupFiles: args.get('no-backed') != true,
         overwritePathDependencies: args.get('overwrite-path'),
-        overwriteDependencyOverrides: args.get('overwrite-overrides')));
+        overwriteDependencyOverrides: args.get('overwrite-overrides'));
+
+    if (File(options.target).existsSync()) {
+      print('The destination file pubspec.yaml does not exist');
+      exit(1);
+    }
+    ;
+    var result = await syncPubspecFiles(options);
     var mismatches = result.mismatches;
     var skipped = result.skipped;
     var matches = result.matches;
