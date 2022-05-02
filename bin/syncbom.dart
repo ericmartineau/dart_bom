@@ -47,7 +47,7 @@ Future main(List<String> arguments) {
       overwritePathDependencies: args.get('overwrite-path'),
       overwriteDependencyOverrides: args.get('overwrite-overrides'));
 
-  if (File(options.target).existsSync()) {
+  if (!File(options.target).existsSync()) {
     print('The destination file pubspec.yaml does not exist');
     exit(1);
   }
