@@ -1,3 +1,7 @@
+## 1.5.0
+
+ - **FEAT**: cleaning cache and republish.
+
 ## 1.4.0
 
  - **FEAT**: Updated description.
