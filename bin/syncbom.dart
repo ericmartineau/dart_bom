@@ -43,7 +43,7 @@ Future main(List<String> arguments) {
       source: args.get('source'),
       target: args.get('target'),
       writeFiles: args.get('write'),
-      backupFiles: args.get('no-backed') != true,
+      backupFiles: args.get('no-backup') != true,
       overwritePathDependencies: args.get('overwrite-path'),
       overwriteDependencyOverrides: args.get('overwrite-overrides'));
 
