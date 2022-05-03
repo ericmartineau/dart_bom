@@ -1,3 +1,9 @@
+class DartVersionOptions {
+  final String source;
+
+  const DartVersionOptions([this.source = './pubspec.yaml']);
+}
+
 class DartBomOptions {
   final String? _source;
   final String target;

@@ -10,7 +10,7 @@ void main() {
     final files = await setupPubspecFiles(
         source: PubSpec(), target: PubSpec(), prefix: 'empty');
 
-    final result = await files.execute();
+    final result = await files.executeSyncBom();
     expect(result.mismatches, isEmpty);
     expect(result.matches, isEmpty);
     expect(result.skipped, isEmpty);
@@ -27,7 +27,7 @@ void main() {
         }),
         prefix: 'simple');
 
-    final result = await files.execute();
+    final result = await files.executeSyncBom();
     expect(result.mismatches, isNotEmpty);
     expect(result.mismatches.first.package, equals('path'));
     expect(result.targetPubspec.dependencies['path']!, finalVersion);
@@ -45,7 +45,7 @@ void main() {
         }),
         prefix: 'simple');
 
-    final result = await files.execute();
+    final result = await files.executeSyncBom();
     expect(result.mismatches, isEmpty);
     expect(result.skipped, isNotEmpty);
     expect(result.skipped.first.package, equals('path'));
@@ -64,12 +64,49 @@ void main() {
         }),
         prefix: 'simple');
 
-    final result = await files.execute();
+    final result = await files.executeSyncBom();
     expect(result.mismatches, isEmpty);
     expect(result.skipped, isNotEmpty);
     expect(result.skipped.first.package, equals('path'));
     expect(result.targetPubspec.dependencyOverrides['path']!,
         HostedReference(Version.parse('1.4.0')));
+  });
+
+  test('Test get my dependency with publish_to', () async {
+    var finalVersion = HostedReference(Version.parse('1.2.0'));
+    final files = await setupPubspecFiles(
+        source: PubSpec(
+            version: Version.parse('0.2.3'),
+            publishTo: Uri.parse('https://myspecialpubserver.com'),
+            dependencies: {
+              'path': finalVersion,
+            }),
+        target: PubSpec(),
+        prefix: 'simple');
+
+    final result = await files.executePrintMyVersion();
+    expect(
+        result,
+        equals(
+          "  bom_simple:\n    hosted: https://myspecialpubserver.com\n    version: ^0.2.3\n",
+        ));
+  });
+
+  test('Test get my dependency without publish_to', () async {
+    var finalVersion = HostedReference(Version.parse('1.2.0'));
+    final files = await setupPubspecFiles(
+        source: PubSpec(version: Version.parse('0.2.3'), dependencies: {
+          'path': finalVersion,
+        }),
+        target: PubSpec(),
+        prefix: 'simple');
+
+    final result = await files.executePrintMyVersion();
+    expect(
+        result,
+        equals(
+          "  bom_simple: ^0.2.3\n",
+        ));
   });
 
   test('Force override skip path dependencies', () async {
@@ -83,7 +120,7 @@ void main() {
         }),
         prefix: 'simple');
 
-    final result = await files.execute(overwritePathDependencies: true);
+    final result = await files.executeSyncBom(overwritePathDependencies: true);
     expect(result.mismatches, isNotEmpty);
     expect(result.mismatches.first.package, equals('path'));
     expect(result.targetPubspec.dependencies['path']!, finalVersion);
@@ -101,7 +138,8 @@ void main() {
         }),
         prefix: 'override');
 
-    final result = await files.execute(overwriteDependencyOverrides: true);
+    final result =
+        await files.executeSyncBom(overwriteDependencyOverrides: true);
     expect(result.mismatches, isNotEmpty);
     expect(result.mismatches.first.package, equals('path'));
     expect(result.targetPubspec.dependencyOverrides['path']!, finalVersion);
@@ -110,7 +148,7 @@ void main() {
 
   test('Invalid source file', () async {
     final files = PubSetup(File('nonexist'), File('nonexist'));
-    expect(() => files.execute(),
+    expect(() => files.executeSyncBom(),
         throwsA(isA<DartBomException>().withExitCode(2)));
   });
 }
@@ -137,7 +175,11 @@ class PubSetup {
 
   PubSetup(this.sourceFile, this.targetFile);
 
-  Future<DartBomResult> execute({
+  Future<String> executePrintMyVersion() {
+    return getMyVersion(DartVersionOptions(this.sourceFile.absolute.path));
+  }
+
+  Future<DartBomResult> executeSyncBom({
     bool writeFiles = false,
     bool overwritePathDependencies = false,
     bool overwriteDependencyOverrides = false,

@@ -85,9 +85,3 @@ Future main(List<String> arguments) {
     }
   });
 }
-
-extension on ArgResults {
-  T get<T>(String key, [T? defaultValue]) {
-    return (this[key] as T? ?? defaultValue!);
-  }
-}

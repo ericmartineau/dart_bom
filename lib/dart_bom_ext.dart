@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:pubspec/pubspec.dart';
 
 import 'dart_bom_result.dart';
@@ -7,6 +8,12 @@ import 'dart_bom_result.dart';
 extension DependencyLocationExt on DependencyLocation {
   String get value {
     return "$this".replaceAll('DependencyLocation.', '');
+  }
+}
+
+extension ArgResultsCastingGetterExt on ArgResults {
+  T get<T>(String key, [T? defaultValue]) {
+    return (this[key] as T? ?? defaultValue!);
   }
 }
 
