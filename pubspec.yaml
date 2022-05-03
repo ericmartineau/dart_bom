@@ -9,9 +9,12 @@ environment:
 executables:
   syncbom: syncbom
   myversion: myversion
+  lastpub: lastpub
+  allpub: allpub
 
 dependencies:
   args: ^2.3.0
+  http: ^0.13.4
   path: ^1.8.0
   pubspec: ^2.1.0
 
