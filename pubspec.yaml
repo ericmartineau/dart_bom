@@ -8,6 +8,7 @@ environment:
 
 executables:
   syncbom: syncbom
+  myversion: myversion
 
 dependencies:
   args: ^2.3.0
