@@ -63,25 +63,18 @@ Future main(List<String> arguments) {
   }).then((result) {
     var mismatches = result.mismatches;
     var skipped = result.skipped;
-    var matches = result.matches;
-    print("RESULTS OF DART_BOM:");
     if (mismatches.isNotEmpty) {
-      print("  NEEDS UPDATE: ");
-
       mismatches.forEach((value) {
-        print('    ${value.location}[${value.package}]:');
-        print('      original: ${value.original}');
-        print('      bom: ${value.fromBom}');
+        print(
+            'mismatch: ${value.location}[${value.package}]: ${value.original} -> ${value.fromBom}'
+                .replaceAll('\n', ' '));
       });
     }
     if (skipped.isNotEmpty) {
-      print("  SKIPPED: ");
       skipped.forEach((value) {
-        print('    ${value.location.value}[${value.package}]: ${value.reason}');
+        print(
+            'skipped: ${value.location.value}[${value.package}]: ${value.reason}');
       });
-    }
-    if (matches.isNotEmpty) {
-      print("  MATCHES: ${matches.map((e) => e.package).join(', ')}");
     }
   });
 }
