@@ -1,3 +1,7 @@
+## 1.8.1
+
+ - **FIX**: Fixing commands.
+
 ## 1.8.0
 
  - **FEAT**: :Adding pub lookups2.
