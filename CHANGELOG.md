@@ -1,3 +1,7 @@
+## 1.6.3
+
+ - **FIX**: Removing extra output.
+
 ## 1.6.2
 
  - **FIX**: Missing help flag.
