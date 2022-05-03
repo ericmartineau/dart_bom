@@ -11,6 +11,11 @@ Future main(List<String> arguments) {
       abbr: "s",
       help: 'The path to a pubspec file',
       defaultsTo: './pubspec.yaml');
+  argParser.addFlag(
+    "help",
+    abbr: "h",
+    help: 'Shows help info',
+  );
   var args = argParser.parse(arguments);
 
   if (args['help'] == true) {
