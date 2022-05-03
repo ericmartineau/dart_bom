@@ -16,13 +16,21 @@ Future<String> getMyVersion(
         'ERROR: Unable to parse ${options.source} as a pubspec.yaml: $e', 2);
   }
 
+  var sourceFile = File(options.source);
   var myVersion = '';
-  if (sourcePubspec.publishTo != null) {
-    myVersion += ("  ${sourcePubspec.name}:\n");
-    myVersion += ("    hosted: ${sourcePubspec.publishTo}\n");
-    myVersion += ("    version: ^${sourcePubspec.version}\n");
-  } else {
-    myVersion += ("  ${sourcePubspec.name}: ^${sourcePubspec.version}\n");
+  switch (sourcePubspec.publishTo?.toString()) {
+    case 'none':
+      var myVersion = '';
+      myVersion += ("  ${sourcePubspec.name}:\n");
+      myVersion += ("    path: ${sourceFile.parent.absolute.path}\n");
+      return myVersion;
+    case null:
+      return "  ${sourcePubspec.name}: ^${sourcePubspec.version}\n";
+    default:
+      var myVersion = '';
+      myVersion += ("  ${sourcePubspec.name}:\n");
+      myVersion += ("    hosted: ${sourcePubspec.publishTo}\n");
+      myVersion += ("    version: ^${sourcePubspec.version}\n");
+      return myVersion;
   }
-  return myVersion;
 }

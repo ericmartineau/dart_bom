@@ -109,6 +109,26 @@ void main() {
         ));
   });
 
+  test('Test get my dependency where publish_to == none', () async {
+    var finalVersion = HostedReference(Version.parse('1.2.0'));
+    final files = await setupPubspecFiles(
+        source: PubSpec(
+            version: Version.parse('0.2.3'),
+            publishTo: Uri.parse('none'),
+            dependencies: {
+              'path': finalVersion,
+            }),
+        target: PubSpec(),
+        prefix: 'simple');
+
+    final result = await files.executePrintMyVersion();
+    expect(
+        result,
+        equals(
+          "  bom_simple:\n    path: /Users/ericm/sunny/local_plugins/dart_bom/.\n",
+        ));
+  });
+
   test('Force override skip path dependencies', () async {
     var finalVersion = HostedReference(Version.parse('1.2.0'));
     final files = await setupPubspecFiles(
