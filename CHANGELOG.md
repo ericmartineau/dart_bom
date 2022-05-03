@@ -1,3 +1,7 @@
+## 1.7.0
+
+ - **FEAT**: :Adding pub lookups.
+
 ## 1.6.6
 
  - **FIX**: Null versions report as path.
