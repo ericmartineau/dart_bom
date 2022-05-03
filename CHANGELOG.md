@@ -1,3 +1,7 @@
+## 1.6.1
+
+ - **FIX**: Forgot to add the executables section.
+
 ## 1.6.0
 
  - **FEAT**: Adding printMyVersion.
