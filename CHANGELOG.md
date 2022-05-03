@@ -1,3 +1,7 @@
+## 1.6.6
+
+ - **FIX**: Null versions report as path.
+
 ## 1.6.5
 
  - **FIX**: dont print out version when publish_to=none.
