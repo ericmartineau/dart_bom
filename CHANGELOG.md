@@ -1,3 +1,7 @@
+## 1.6.2
+
+ - **FIX**: Missing help flag.
+
 ## 1.6.1
 
  - **FIX**: Forgot to add the executables section.
