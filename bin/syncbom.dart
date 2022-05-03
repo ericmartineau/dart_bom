@@ -66,7 +66,7 @@ Future main(List<String> arguments) {
     if (mismatches.isNotEmpty) {
       mismatches.forEach((value) {
         print(
-            'mismatch: ${value.location}[${value.package}]: ${value.original} -> ${value.fromBom}'
+            'mismatch: ${value.location.value}[${value.package}]: ${value.original} -> ${value.fromBom}'
                 .replaceAll('\n', ' '));
       });
     }
