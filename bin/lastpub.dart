@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:dart_bom/dart_bom.dart';
 import 'package:dart_bom/lastpub.dart';
+import 'package:path/path.dart' as path;
 import 'package:dart_bom/print_my_version.dart';
 
 Future main(List<String> arguments) {
@@ -29,12 +30,11 @@ Future main(List<String> arguments) {
     exit(1);
   }
 
-  var options = DartVersionOptions(args.get('source'));
-
-  var sourceFile = File(options.source);
-  if (!sourceFile.existsSync()) {
-    print('The source file ${sourceFile.absolute.path} does not exist');
+  var targetPubspec = resolvePubspec(args.get('source'));
+  if (!targetPubspec.existsSync()) {
+    print('The source file ${targetPubspec.absolute.path} does not exist');
     exit(1);
   }
+  var options = DartVersionOptions(targetPubspec.absolute.path);
   return getLastPublishedVersion(options).then(print);
 }

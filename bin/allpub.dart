@@ -29,13 +29,12 @@ Future main(List<String> arguments) {
     exit(1);
   }
 
-  var options = DartVersionOptions(args.get('source'));
-
-  var sourceFile = File(options.source);
-  if (!sourceFile.existsSync()) {
-    print('The source file ${sourceFile.absolute.path} does not exist');
+  var targetPubspec = resolvePubspec(args.get('source'));
+  if (!targetPubspec.existsSync()) {
+    print('The source file ${targetPubspec.absolute.path} does not exist');
     exit(1);
   }
+  var options = DartVersionOptions(targetPubspec.absolute.path);
   return getPublishedVersions(options).then((list) {
     list.forEach(print);
   });
