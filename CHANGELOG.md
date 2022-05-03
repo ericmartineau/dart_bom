@@ -1,3 +1,7 @@
+## 1.8.0
+
+ - **FEAT**: :Adding pub lookups2.
+
 ## 1.7.0
 
  - **FEAT**: :Adding pub lookups.
