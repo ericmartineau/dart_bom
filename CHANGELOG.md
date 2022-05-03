@@ -1,3 +1,7 @@
+## 1.6.5
+
+ - **FIX**: dont print out version when publish_to=none.
+
 ## 1.6.4
 
  - **FIX**: Formatting.
