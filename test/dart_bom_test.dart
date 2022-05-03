@@ -109,6 +109,18 @@ void main() {
         ));
   });
 
+  test('Test get my dependency with null version', () async {
+    final files = await setupPubspecFiles(
+        source: PubSpec(dependencies: {}), target: PubSpec(), prefix: 'simple');
+
+    final result = await files.executePrintMyVersion();
+    expect(
+        result,
+        equals(
+          "  bom_simple:\n    path: /Users/ericm/sunny/local_plugins/dart_bom/.\n",
+        ));
+  });
+
   test('Test get my dependency where publish_to == none', () async {
     var finalVersion = HostedReference(Version.parse('1.2.0'));
     final files = await setupPubspecFiles(

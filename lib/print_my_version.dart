@@ -18,19 +18,19 @@ Future<String> getMyVersion(
 
   var sourceFile = File(options.source);
   var myVersion = '';
-  switch (sourcePubspec.publishTo?.toString()) {
-    case 'none':
-      var myVersion = '';
-      myVersion += ("  ${sourcePubspec.name}:\n");
-      myVersion += ("    path: ${sourceFile.parent.absolute.path}\n");
-      return myVersion;
-    case null:
-      return "  ${sourcePubspec.name}: ^${sourcePubspec.version}\n";
-    default:
-      var myVersion = '';
-      myVersion += ("  ${sourcePubspec.name}:\n");
-      myVersion += ("    hosted: ${sourcePubspec.publishTo}\n");
-      myVersion += ("    version: ^${sourcePubspec.version}\n");
-      return myVersion;
+  if (sourcePubspec.publishTo?.toString() == 'none' ||
+      sourcePubspec.version == null) {
+    var myVersion = '';
+    myVersion += ("  ${sourcePubspec.name}:\n");
+    myVersion += ("    path: ${sourceFile.parent.absolute.path}\n");
+    return myVersion;
+  } else if (sourcePubspec.publishTo != null) {
+    var myVersion = '';
+    myVersion += ("  ${sourcePubspec.name}:\n");
+    myVersion += ("    hosted: ${sourcePubspec.publishTo}\n");
+    myVersion += ("    version: ^${sourcePubspec.version}\n");
+    return myVersion;
+  } else {
+    return "  ${sourcePubspec.name}: ^${sourcePubspec.version}\n";
   }
 }
