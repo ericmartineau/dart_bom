@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'dart_bom.dart';
 
 Uri get pubUrl => Uri.parse('https://pub.dev');
+Uri get noneUrl => Uri.parse('none');
 
 Future<Version?> getLastPublishedVersion(
     [DartVersionOptions options = const DartVersionOptions()]) async {
@@ -22,9 +23,12 @@ Future<List<Version>> getPublishedVersions(
   }
   var pubspec = await PubSpec.loadFile(options.source);
   var name = pubspec.name!;
-  var pubHosted = pubspec.publishTo ?? pubUrl;
+  Uri? pubHosted = pubspec.publishTo;
+  if (pubHosted?.hasScheme != true) {
+    pubHosted = pubUrl;
+  }
 
-  final url = pubHosted.replace(path: '/packages/$name.json');
+  final url = pubHosted!.replace(path: '/packages/$name.json');
   final response = await http.get(url);
 
   if (response.statusCode == 404) {
