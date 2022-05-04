@@ -26,7 +26,7 @@ Future<Version?> getLastVersionsForPackage(String packageName,
 Future<List<Version>> getPublishedVersionsForPackage(String packageName,
     {Uri? publishedTo}) async {
   if (publishedTo == null || publishedTo == noneUrl) {
-    publishedTo ??= pubUrl;
+    publishedTo = pubUrl;
   }
   final url = publishedTo.replace(path: '/packages/$packageName.json');
   final response = await http.get(url);
