@@ -1,7 +1,9 @@
 class DartVersionOptions {
   final String source;
+  final bool published;
 
-  const DartVersionOptions([this.source = './pubspec.yaml']);
+  const DartVersionOptions(
+      {this.source = './pubspec.yaml', this.published = false});
 }
 
 class DartBomOptions {

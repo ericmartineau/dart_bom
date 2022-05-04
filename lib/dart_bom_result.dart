@@ -7,6 +7,11 @@ class DartBomException implements Exception {
   final String message;
 
   const DartBomException(this.message, this.exitCode);
+
+  @override
+  String toString() {
+    return "(${exitCode}) $message";
+  }
 }
 
 class DependencyMismatch {

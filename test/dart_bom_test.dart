@@ -208,7 +208,8 @@ class PubSetup {
   PubSetup(this.sourceFile, this.targetFile);
 
   Future<String> executePrintMyVersion() {
-    return getMyVersion(DartVersionOptions(this.sourceFile.absolute.path));
+    return getMyVersion(
+        DartVersionOptions(source: this.sourceFile.absolute.path));
   }
 
   Future<DartBomResult> executeSyncBom({
