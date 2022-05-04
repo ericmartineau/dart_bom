@@ -1,3 +1,7 @@
+## 1.8.3
+
+ - **FIX**: Handle none.
+
 ## 1.8.2
 
  - **FIX**: Handle none.
