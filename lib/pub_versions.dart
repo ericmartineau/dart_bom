@@ -28,7 +28,10 @@ Future<List<Version>> getPublishedVersionsForPackage(String packageName,
   if (publishedTo == null || publishedTo == noneUrl) {
     publishedTo = pubUrl;
   }
-  final url = publishedTo.replace(path: '/packages/$packageName.json');
+  if (!publishedTo.path.endsWith('/')) {
+    publishedTo = Uri.parse('$publishedTo/');
+  }
+  final url = publishedTo.resolve('api/packages/$packageName');
   final response = await http.get(url);
 
   if (response.statusCode == 404) {
@@ -41,10 +44,10 @@ Future<List<Version>> getPublishedVersionsForPackage(String packageName,
         3);
   }
   final versions = <Version>[];
-  final versionsRaw =
-      ((json.decode(response.body) as Map)['versions'] as List).cast<String>();
+  var jsonBody = json.decode(response.body);
+  final versionsRaw = (jsonBody['versions'] as List);
   for (final versionElement in versionsRaw) {
-    versions.add(Version.parse(versionElement));
+    versions.add(Version.parse(versionElement['version'] as String));
   }
   versions.sort((Version a, Version b) {
     return Version.prioritize(a, b);
