@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:dart_bom/dart_bom.dart';
 import 'package:dart_bom/pub_versions.dart';
-import 'package:path/path.dart' as path;
-import 'package:dart_bom/print_my_version.dart';
 
 Future main(List<String> arguments) {
   final ArgParser argParser = ArgParser();

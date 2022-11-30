@@ -1,9 +1,23 @@
+import 'package:dart_bom/repos_config.dart';
+
 class DartVersionOptions {
   final String source;
   final bool published;
 
   const DartVersionOptions(
       {this.source = './pubspec.yaml', this.published = false});
+}
+
+class DartReposOptions {
+  final ReposConfig repos;
+  final String workingDirectory;
+  final bool checkout;
+
+  const DartReposOptions({
+    required this.workingDirectory,
+    required this.repos,
+    this.checkout = false,
+  });
 }
 
 class DartBomOptions {

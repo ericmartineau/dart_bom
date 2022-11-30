@@ -46,10 +46,18 @@ String resolvePath(String pathName) {
 }
 
 File resolvePubspec([String? providedPath]) {
-  var pathName = providedPath ?? './pubspec.yaml';
+  return resolveFile('pubspec.yaml', providedPath);
+}
+
+File resolveRepos([String? providedPath]) {
+  return resolveFile('repos.yaml', providedPath);
+}
+
+File resolveFile(String fileName, [String? providedPath]) {
+  var pathName = providedPath ?? './$fileName';
   pathName = resolvePath(pathName);
-  if (!pathName.endsWith('pubspec.yaml')) {
-    pathName = path.join(pathName, 'pubspec.yaml');
+  if (!pathName.endsWith(fileName)) {
+    pathName = path.join(pathName, fileName);
   }
   var directFile = File(pathName);
   return directFile;
