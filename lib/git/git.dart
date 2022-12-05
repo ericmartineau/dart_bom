@@ -96,6 +96,33 @@ class GitClient {
     return (processResult.stdout as String).contains(tag);
   }
 
+  /// Check a tag exists.
+  Future<List<Branch>> get allBranches async {
+    final processResult = await executeCommand(
+      arguments: ['branch', '-a'],
+    );
+    return (processResult.stdout as List)
+        .map((l) => Branch.of(l.toString()))
+        .toList();
+  }
+
+  Future<bool> hasBranch(String branchName) async {
+    final branches = await allBranches;
+    return branches.any((branch) =>
+        branch.branchName.toLowerCase() == branchName.toLowerCase());
+  }
+
+  /// Creates a new branch
+  Future<void> createBranch(String branchName) async {
+    await executeCommand(
+      arguments: [
+        'checkout',
+        '-b',
+        branchName,
+      ],
+    );
+  }
+
   /// Create a tag, if it does not already exist.
   ///
   /// Returns true if tag was successfully created.
@@ -256,5 +283,20 @@ class GitClient {
     );
 
     return isBehind;
+  }
+}
+
+class Branch {
+  final String branchName;
+  final String? remote;
+
+  const Branch({required this.branchName, this.remote});
+  factory Branch.of(String input) {
+    if (input.startsWith("remotes/")) {
+      var parts = input.split("/");
+      return Branch(branchName: parts.sublist(2).join("/"), remote: parts[1]);
+    } else {
+      return Branch(branchName: input);
+    }
   }
 }

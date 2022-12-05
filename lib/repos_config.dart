@@ -130,6 +130,8 @@ class ReposConfig extends Equatable {
   const ReposConfig({
     this.checkoutRoot,
     this.defaultMode = CheckoutMode.published,
+    this.defaultRef,
+    this.defaultBase,
     this.sources = const {},
   });
 
@@ -138,6 +140,8 @@ class ReposConfig extends Equatable {
     return ReposConfig(
       checkoutRoot: yaml['checkoutRoot'] as String?,
       defaultMode: defaultMode ?? CheckoutMode.published,
+      defaultRef: yaml['defaultRef'] as String?,
+      defaultBase: yaml['defaultBase'] as String?,
       sources: {
         for (final entry
             in ((yaml['sources'] ?? {}) as Map<Object?, Object?>).entries)
@@ -160,17 +164,27 @@ class ReposConfig extends Equatable {
   final Map<String, PackageCheckoutConfig> sources;
   final String? checkoutRoot;
   final CheckoutMode defaultMode;
+  final String? defaultRef;
+  final String? defaultBase;
 
   Map<String, Object?> toJson() {
     return {
       'sources': {for (final en in sources.entries) en.key: en.value.toJson()},
       'checkoutRoot': checkoutRoot,
       'defaultMode': defaultMode.name,
+      if (defaultRef != null) 'defaultRef': defaultRef,
+      if (defaultBase != null) 'defaultBase': defaultBase,
     };
   }
 
   @override
-  List<Object?> get props => [sources, checkoutRoot, defaultMode];
+  List<Object?> get props => [
+        defaultRef,
+        sources,
+        checkoutRoot,
+        defaultMode,
+        defaultBase,
+      ];
 
   @override
   bool get stringify => true;
@@ -179,6 +193,8 @@ class ReposConfig extends Equatable {
     Map<String, PackageCheckoutConfig>? sources,
     String? checkoutRoot,
     CheckoutMode? defaultMode,
+    String? defaultRef,
+    String? defaultBase,
   }) {
     return ReposConfig(
       sources: {
@@ -186,6 +202,8 @@ class ReposConfig extends Equatable {
         ...?sources,
       },
       checkoutRoot: checkoutRoot ?? this.checkoutRoot,
+      defaultRef: defaultRef ?? this.defaultRef,
+      defaultBase: defaultBase ?? this.defaultBase,
       defaultMode: defaultMode ?? this.defaultMode,
     );
   }

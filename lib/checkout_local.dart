@@ -29,9 +29,14 @@ Future<void> checkoutLocal(DartReposOptions options, CliLogger logger) async {
         switch (value.mode ?? checkout.defaultMode) {
           case CheckoutMode.local:
             if (value.git != null) {
+              final git = GitReference(
+                value.git!.url,
+                value.git!.ref ?? options.repos.defaultRef,
+                value.git!.path,
+              );
               await checkoutProject(
                 key,
-                value.git!,
+                git,
                 dir,
                 logger: logger.trace,
                 result: result,
@@ -123,7 +128,7 @@ Future<CheckoutResult> checkoutProject(
 
   /// CHECK TAG/BRANCH
   if (gitReference.ref != null) {
-    Future<List<String>> allTagsOrBranch() async {
+    Future<List<String>> currentCheckoutTags() async {
       final currentBranchName = await git.currentBranchName;
 
       final allTags = (currentBranchName == 'HEAD')
@@ -135,18 +140,26 @@ Future<CheckoutResult> checkoutProject(
 
     final expectedTag = gitReference.ref;
 
-    var allTags = await allTagsOrBranch();
+    var allTags = await currentCheckoutTags();
     if (!allTags.contains(gitReference.ref)) {
-      result.message(
-        'branch: changing to $expectedTag (was $allTags)',
-      );
-      await git.checkout(ref: gitReference.ref!);
-      allTags = await allTagsOrBranch();
-      if (!allTags.contains(expectedTag)) {
-        result.error(
-          'Branch change to $expectedTag failed:'
-          ' Current branch/tag: $allTags',
+      /// Check to see if the branch exists
+
+      var branchName = gitReference.ref!;
+      if (!await git.hasBranch(branchName)) {
+        await git.createBranch(branchName);
+      } else {
+        result.message(
+          'branch: changing to $expectedTag (was $allTags)',
         );
+
+        await git.checkout(ref: branchName);
+        allTags = await currentCheckoutTags();
+        if (!allTags.contains(expectedTag)) {
+          result.error(
+            'Branch change to $expectedTag failed:'
+            ' Current branch/tag: $allTags',
+          );
+        }
       }
     } else {
       result.message(

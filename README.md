@@ -1,3 +1,3 @@
 dart_bom
 
-Some tools for dart projetcts
+Some tools for dart projects
