@@ -26,3 +26,5 @@ executables:
   myversion: myversion
   lastpub: lastpub
   allpub: allpub
+  repospec: repospec
+  checkout: checkout

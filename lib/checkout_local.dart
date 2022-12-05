@@ -38,7 +38,7 @@ Future<void> checkoutLocal(DartReposOptions options, CliLogger logger) async {
                 key,
                 git,
                 dir,
-                logger: logger.trace,
+                logger: logger,
                 result: result,
               );
             } else {
@@ -84,9 +84,10 @@ Future<CheckoutResult> checkoutProject(
   String projectName,
   GitReference gitReference,
   Directory checkoutDir, {
-  LogFn logger = noop,
+  CliLogger? logger,
   CheckoutResult? result,
 }) async {
+  logger ??= CliLogger();
   result ??= CheckoutResult();
   final folderName = gitUrlToFolderPath(gitReference.url);
   final subdir = checkoutDir.subdirs(folderName);

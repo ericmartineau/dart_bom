@@ -1,28 +1,19 @@
 import 'dart:io';
 
+import 'package:dart_bom/common/logging.dart';
+import 'package:dart_bom/common/pubspec_ext.dart';
 import 'package:pubspec/pubspec.dart';
 
 import 'dart_bom.dart';
 
-Future<DartBomResult> syncPubspecFiles(
-    [DartBomOptions options = const DartBomOptions()]) async {
-  late PubSpec sourcePubspec;
-  late PubSpec targetPubspec;
-
-  try {
-    var loadFile = PubSpec.loadFile(options.source);
-    sourcePubspec = await loadFile;
-  } catch (e) {
-    throw DartBomException(
-        'ERROR: Unable to parse ${options.source} as a pubspec.yaml: $e', 2);
-  }
-  try {
-    targetPubspec = await PubSpec.loadFile(options.target);
-  } catch (e) {
-    throw DartBomException(
-        'ERROR: Unable to parse target ${options.target} as a pubspec.yaml: $e',
-        2);
-  }
+Future<DartBomResult> syncPubspecData(
+  PubSpec sourcePubspec,
+  PubSpec targetSpec, {
+  PubSpec? overrideSpec,
+  required DartBomOptions options,
+  required CliLogger logger,
+}) async {
+  final output = targetSpec;
 
   var allDependencies = <String, DependencyReference>{
     ...sourcePubspec.dependencies,
@@ -30,13 +21,23 @@ Future<DartBomResult> syncPubspecFiles(
     ...sourcePubspec.dependencyOverrides,
   };
 
+  void addPathDependency(
+      DependencyLocation location, String name, DependencyReference ref) {
+    if (overrideSpec != null) {
+      overrideSpec.dependencyOverrides[name] = ref;
+    } else {
+      targetSpec.getDependencies(location)[name] = ref;
+    }
+  }
+
   var mismatches = <DependencyMismatch>[];
+  var hasPathChanges = false;
   var skipped = <DependencyMismatch>[];
   var matches = <DependencyMismatch>[];
   ({
-    DependencyLocation.dependencies: targetPubspec.dependencies,
-    DependencyLocation.devDependencies: targetPubspec.devDependencies,
-    DependencyLocation.dependencyOverrides: targetPubspec.dependencyOverrides,
+    DependencyLocation.dependencies: output.dependencies,
+    DependencyLocation.devDependencies: output.devDependencies,
+    DependencyLocation.dependencyOverrides: output.dependencyOverrides,
   }).forEach((type, depCollection) {
     depCollection.forEach((packageName, currentDependency) {
       var fromBom = allDependencies[packageName];
@@ -54,14 +55,19 @@ Future<DartBomResult> syncPubspecFiles(
             !options.overwritePathDependencies) {
           skipped.add(result
             ..reason =
-                'Not overwriting path dependencies.  Use --overwrite-path to force this behavior');
+                'Not overwriting hasPathChanges dependencies.  Use --overwrite-hasPathChanges to force this behavior');
         } else if (type == DependencyLocation.dependencyOverrides &&
             !options.overwriteDependencyOverrides) {
           skipped.add(result
             ..reason =
                 'Not overwriting dependency_overrides section:  Use --overwrite-overwrites to force this behavior');
         } else {
-          depCollection[packageName] = fromBom;
+          if (currentDependency is PathReference) {
+            addPathDependency(type, packageName, fromBom);
+            hasPathChanges = true;
+          } else {
+            depCollection[packageName] = fromBom;
+          }
           mismatches.add(result);
         }
       }
@@ -73,22 +79,28 @@ Future<DartBomResult> syncPubspecFiles(
       matches: matches,
       skipped: skipped,
       sourcePubspec: sourcePubspec,
-      targetPubspec: targetPubspec,
+      targetPubspec: output,
       sourceFile: options.source,
       targetFile: options.target);
 
   if (options.writeFiles) {
-    if (mismatches.isEmpty) {
-      return bomResult;
-    }
-    if (options.backupFiles) {
-      print(
-          'Making backup of target file: .${options.source}.${DateTime.now().millisecondsSinceEpoch / 1000}.bak');
-      File(options.target).copySync(
-          '.${options.source}.${DateTime.now().millisecondsSinceEpoch / 1000}.bak');
+    if (!mismatches.isEmpty) {
+      if (options.backupFiles) {
+        logger.log(
+            'Making backup of target file: .${options.source}.${DateTime.now().millisecondsSinceEpoch / 1000}.bak');
+        File(options.target).copySync(
+            '.${options.source}.${DateTime.now().millisecondsSinceEpoch / 1000}.bak');
+      }
+
+      await output.writeTo(options.target);
     }
 
-    await targetPubspec.writeTo(options.target);
+    if (hasPathChanges && overrideSpec != null) {
+      logger.log('Writing pubspec_overrides.dart');
+      var overridePath =
+          File(options.target).sibling("pubspec_overrides.dart").absolute.path;
+      await overrideSpec.writeTo(overridePath);
+    }
   }
 
   return bomResult;

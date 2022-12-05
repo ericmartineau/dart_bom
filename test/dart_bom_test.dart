@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dart_bom/common/logging.dart';
 import 'package:dart_bom/dart_bom.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
@@ -213,10 +214,12 @@ class PubSetup {
   }
 
   Future<DartBomResult> executeSyncBom({
+    CliLogger? logger,
     bool writeFiles = false,
     bool overwritePathDependencies = false,
     bool overwriteDependencyOverrides = false,
   }) {
+    logger ??= CliLogger();
     var args = DartBomOptions(
       source: sourceFile.absolute.path,
       target: targetFile.absolute.path,
@@ -226,7 +229,7 @@ class PubSetup {
     );
     print('Running syncPubSpecFiles ${args}');
 
-    return syncPubspecFiles(args);
+    return syncPubspecFiles(logger, args);
   }
 }
 

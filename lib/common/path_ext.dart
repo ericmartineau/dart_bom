@@ -2,6 +2,12 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 
+extension FileChildren on File {
+  File sibling(String name) {
+    return parent.child(name);
+  }
+}
+
 extension DirectoryChildren on Directory {
   Directory subdir(String name) {
     return Directory(join(path, name));

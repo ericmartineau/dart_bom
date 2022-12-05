@@ -2,16 +2,16 @@ import 'dart:io';
 
 import 'package:dart_bom/common/utils.dart';
 import 'package:dart_bom/dart_bom.dart';
-import 'package:dart_bom/git/git.dart';
 import 'package:dart_bom/repos_config.dart';
 import 'package:path/path.dart';
 import 'package:pubspec/pubspec.dart';
 
 import 'checkout_local.dart';
+import 'common/logging.dart';
 
 /// Creates a pubspec override in this project
 Future<PubSpec> createPubspecOverrides(
-    DartReposOptions options, LogFn logger) async {
+    DartReposOptions options, CliLogger logger) async {
   var workingDir = Directory(options.workingDirectory);
 
   final dependencies = <String, DependencyReference>{};
@@ -38,16 +38,16 @@ Future<PubSpec> createPubspecOverrides(
       case CheckoutMode.local:
         var localPath = localExpectedPath();
         if (options.checkout && !Directory(localPath!).existsSync()) {
-          logger('Checking out $projectName');
+          logger.log('Checking out $projectName');
           final res = await checkoutProject(
             projectName,
             gitValue!,
             Directory(options.repos.checkoutRoot!),
           );
           if (!res.success) {
-            logger("Failed to checkout $localPath");
+            logger.warning("Failed to checkout $localPath");
             for (var message in res.messages) {
-              logger('   $message');
+              logger.log('   $message');
             }
           }
         }

@@ -1,5 +1,6 @@
 import 'package:ansi_styles/ansi_styles.dart';
 import 'package:cli_util/cli_logging.dart';
+import 'package:meta/meta.dart';
 
 import 'utils.dart';
 
@@ -33,13 +34,61 @@ final packagePathStyle = AnsiStyles.blue;
 final packageNameStyle = AnsiStyles.bold;
 final errorPackageNameStyle = AnsiStyles.yellow.bold;
 
+abstract class CliLogger implements Logger {
+  factory CliLogger(
+      {Logger? logger,
+      String indentation = '',
+      String childIndentation = '  '}) {
+    return _CliLogger(
+      logger ?? Logger.standard(),
+      indentation,
+      childIndentation,
+    );
+  }
+
+  factory CliLogger.of(
+      {required bool verbose,
+      String indentation = '',
+      String childIndentation = '  '}) {
+    return _CliLogger(
+      verbose ? Logger.verbose() : Logger.standard(),
+      indentation,
+      childIndentation,
+    );
+  }
+
+  CliLogger child(
+    String message, {
+    String prefix = '└> ',
+    bool stderr = false,
+  });
+
+  CliLogger childWithoutMessage({String childIndentation = '  '});
+
+  void log(String message);
+
+  void command(String command, {bool withDollarSign = false});
+
+  void success(String message, {bool dryRun = false});
+
+  void warning(String message, {bool label = true, bool dryRun = false});
+
+  void error(String message, {bool label = true});
+
+  void hint(String message, {bool label = true});
+
+  void newLine();
+
+  void horizontalLine();
+}
+
 /// CLI logger that encapsulates Melos log formatting conventions.
-class CliLogger with _DelegateLogger {
-  CliLogger(
-    Logger logger, {
-    String indentation = '',
-    String childIndentation = '  ',
-  })  : _logger = logger,
+class _CliLogger with _DelegateLogger implements CliLogger {
+  const _CliLogger(
+    Logger logger,
+    String indentation,
+    String childIndentation,
+  )   : _logger = logger,
         _indentation = indentation,
         _childIndentation = childIndentation;
 
@@ -49,6 +98,11 @@ class CliLogger with _DelegateLogger {
   final String _childIndentation;
 
   void log(String message) => stdout(message);
+
+  @protected
+  Logger get internal {
+    return _logger;
+  }
 
   void command(String command, {bool withDollarSign = false}) {
     if (withDollarSign) {
@@ -98,6 +152,7 @@ class CliLogger with _DelegateLogger {
 
   void horizontalLine() => _logger.stdout('-' * terminalWidth);
 
+  @override
   CliLogger child(
     String message, {
     String prefix = '└> ',
@@ -105,7 +160,7 @@ class CliLogger with _DelegateLogger {
   }) {
     final childIndentation = ' ' * AnsiStyles.strip(prefix).length;
     final logger = CliLogger(
-      _logger,
+      logger: _logger,
       indentation: '$_indentation$_childIndentation',
       childIndentation: childIndentation,
     );
@@ -120,8 +175,9 @@ class CliLogger with _DelegateLogger {
     return logger;
   }
 
+  @override
   CliLogger childWithoutMessage({String childIndentation = '  '}) => CliLogger(
-        _logger,
+        logger: _logger,
         indentation: '$_indentation$_childIndentation',
         childIndentation: childIndentation,
       );
@@ -166,14 +222,4 @@ mixin _DelegateLogger implements Logger {
   @override
   // ignore: deprecated_member_use
   void flush() => _logger.flush();
-}
-
-extension ToMelosLoggerExtension on Logger {
-  CliLogger toMelosLogger() {
-    final self = this;
-    if (self is CliLogger) {
-      return self;
-    }
-    return CliLogger(this);
-  }
 }
