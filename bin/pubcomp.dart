@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:dart_bom/commands/autocomplete.dart';
 import 'package:dart_bom/common/cli_command.dart';
+import 'package:dart_bom/pub_versions.dart';
 
-// ALl
-
-Future main(List<String> arguments) {
-  var cmd = AutocompleteCommand(name: 'pubcomp')..argParser.addVerboseFlag();
-  return cmd.bootstrap(arguments);
+Future main(List<String> arguments) async {
+  var cmd = AutocompleteCommand(name: 'pubcomp')
+    ..argParser.addFlag('extended', abbr: 'e')
+    ..argParser.addVerboseFlag();
+  await cmd.bootstrap(arguments);
 }

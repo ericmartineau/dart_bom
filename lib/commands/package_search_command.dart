@@ -17,14 +17,14 @@ class PackageSearchCommand extends CliCommand<dynamic> {
         );
 
   @override
-  FutureOr<List<PackageInfo>> execute(
+  FutureOr<List<DartPackageInfo>> execute(
       CliLogger logger, ArgResults? argResults) {
     return getPackages(argResults!.get("query"));
   }
 
   String? formatResult(dynamic result) {
     if (result == null) return null;
-    if (result is Iterable<PackageInfo>) {
+    if (result is Iterable<DartPackageInfo>) {
       if (argResults!['only-name'] == true) {
         return result.map((e) => e.name).join('\n');
       } else {

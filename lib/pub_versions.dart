@@ -78,7 +78,7 @@ Future<List<Version>> getPublishedVersions(
   }
 }
 
-Future<List<PackageInfo>> getPackages(String query) async {
+Future<List<DartPackageInfo>> getPackages(String query) async {
   final responses = await Future.wait([1, 2].map((page) => http.get(Uri.parse(
       'https://pub.dev/packages?page=$page&q=${Uri.encodeComponent(query)}'))));
   return responses.expand((e) {
@@ -95,12 +95,32 @@ Future<List<PackageInfo>> getPackages(String query) async {
     }
 
     return packages.map((e) {
-      return PackageInfo(
-        getText(e, 'packages-title'),
-        getText(e, 'packages-description'),
-        null,
-        int.tryParse(getText(e, 'packages-score-value-number') ?? '0'),
-        [],
+      String? author;
+      String? recentVersion;
+
+      e.getElementsByClassName('packages-metadata').forEach((element) {
+        var link = element.getElementsByTagName('a').forEach((a) {
+          var href = a.attributes['href'];
+          if (href != null) {
+            if (href.startsWith('/packages')) {
+              /// This is the version number
+              try {
+                recentVersion = Version.parse(a.text).toString();
+              } catch (e) {}
+            } else if (href.startsWith('/publishers')) {
+              author = a.text;
+            }
+          }
+        });
+      });
+
+      return DartPackageInfo(
+        name: getText(e, 'packages-title'),
+        description: getText(e, 'packages-description'),
+        author: author,
+        recentVersion: recentVersion,
+        likes: int.tryParse(getText(e, 'packages-score-value-number') ?? '0'),
+        platforms: [],
       );
     }).where((element) =>
         element.name != null &&
@@ -115,26 +135,29 @@ Future<List<String>> fetchPackageList() async {
   return (json['packages'] as List).cast<String>();
 }
 
-class PackageInfo {
+class DartPackageInfo {
   final String? name;
   final String? description;
   final String? author;
   final int? likes;
   final List<String>? platforms;
+  final String? recentVersion;
 
-  PackageInfo(
+  DartPackageInfo({
     this.name,
     this.description,
     this.author,
     this.likes,
-    this.platforms,
-  );
+    this.recentVersion,
+    this.platforms = const [],
+  });
 
   Map<String, dynamic> toMap() {
     return {
       if (name != null) 'name': this.name,
       if (description != null) 'description': this.description,
       if (author != null) 'author': this.author,
+      if (recentVersion != null) 'recentVersion': this.recentVersion,
       'likes': this.likes,
     };
   }

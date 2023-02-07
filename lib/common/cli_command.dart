@@ -5,11 +5,12 @@ import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:completion/completion.dart';
 import 'package:dart_bom/common/logging.dart';
+import 'package:dart_bom/pub_versions.dart';
 
 typedef CliCommandExec<R> = FutureOr<R> Function(
     CliLogger logger, ArgResults args);
 
-abstract class CliCommand<R> extends Command<R> {
+abstract class CliCommand<R> extends Command<CommandResult<R>> {
   CliCommand({
     required this.name,
     required this.description,
@@ -30,11 +31,12 @@ abstract class CliCommand<R> extends Command<R> {
   final Map<String, CliCommand> commands;
 
   void addCliCommand(CliCommand subCommand) {
-    addSubcommand(subCommand as Command<R>);
+    addSubcommand(subCommand as Command<CommandResult<R>>);
     commands[subCommand.name] = subCommand;
   }
 
-  String? formatResult(R? result) {
+  String? formatResult(CommandResult<R> res) {
+    final result = res.result;
     if (result == null) return null;
     if (result is Iterable) {
       return result.map((e) => e.toString()).join('\n');
@@ -47,7 +49,7 @@ abstract class CliCommand<R> extends Command<R> {
       CliLogger log, bool isVerbose, ArgResults? argResults) async {
     try {
       final res = await this.execute(log, argResults);
-      final logged = formatResult(res);
+      final logged = formatResult(CommandResult(res, argResults, log));
       if (logged != null) {
         log.log(logged);
       }
@@ -65,18 +67,19 @@ abstract class CliCommand<R> extends Command<R> {
     }
   }
 
-  FutureOr<R> run() async {
+  FutureOr<CommandResult<R>> run() async {
     final isVerbose = globalResults?['verbose'] == true;
     final log = CliLogger(
       logger: isVerbose ? Logger.verbose() : Logger.standard(),
     );
 
-    return internalRun(log, isVerbose, argResults);
+    final result = await internalRun(log, isVerbose, argResults);
+    return CommandResult(result, argResults, log);
   }
 
   FutureOr<R?> execute(CliLogger logger, ArgResults? argResult);
 
-  Future<void> bootstrap(List<String> args) async {
+  Future<CommandResult<R>> bootstrap(List<String> args) async {
     ArgResults? argResults;
     try {
       argResults = tryArgsCompletion(args, argParser);
@@ -90,14 +93,30 @@ abstract class CliCommand<R> extends Command<R> {
         log.error('Error parsing args: $e', label: false);
       }
       log.error(argParser.usage, label: false);
-      return;
+      return CommandResult(null, argResults, log);
     }
 
     var isVerbose = argResults['verbose'] == true;
     final log = CliLogger(
       logger: isVerbose ? Logger.verbose() : Logger.standard(),
     );
-    await internalRun(log, isVerbose, argResults);
+    final res = await internalRun(log, isVerbose, argResults);
+    return CommandResult(res, argResults, log);
+  }
+}
+
+class CommandResult<T> {
+  final T? result;
+  final ArgResults? args;
+  final CliLogger log;
+  CommandResult(this.result, this.args, this.log);
+
+  CommandResult<TT> cast<TT>() {
+    return CommandResult(result as TT, args, log);
+  }
+
+  TT get<TT>() {
+    return result as TT;
   }
 }
 

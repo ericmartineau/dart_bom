@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -14,17 +15,30 @@ class AutocompleteCommand extends CliCommand<dynamic> {
           configureArg: (arg) {
             arg
               ..addFlag('local', abbr: 'l')
+              ..addFlag('json', abbr: 'j')
               ..addOption('cache', abbr: 'c', help: 'Cache base dir');
           },
         );
 
   @override
-  Future execute(CliLogger logger, ArgResults? argResults) async {
+  String? formatResult(CommandResult result) {
+    final packages = result.get<List<DartPackageInfo>>();
+
+    if (result.args?['json'] == true) {
+      return jsonEncode(packages.map((e) => e.toMap()).toList());
+    } else {
+      return packages.map((e) => e.name).join(' ');
+    }
+  }
+
+  @override
+  Future<List<DartPackageInfo>> execute(
+      CliLogger logger, ArgResults? argResults) async {
     if (argResults!['local'] == true) {
       var cacheDir = argResults.get<String>('cache', '~/.zsh');
       var resolvedPath = resolvePath(cacheDir);
       if (argResults.arguments.isEmpty) {
-        return '';
+        return const [];
       }
       final query = argResults.arguments.first;
       var rootDir = Directory(resolvedPath);
@@ -39,16 +53,16 @@ class AutocompleteCommand extends CliCommand<dynamic> {
         final firstLetter = query[0].toLowerCase();
         final lines = indexDir.child(firstLetter).readAsLinesSync();
         int found = 0;
-        var results = <String>[];
+        var results = <DartPackageInfo>[];
         for (var line in lines) {
           if (found >= 10) {
             break;
           }
           if (line.startsWith(query) && found++ < 10) {
-            results.add(line);
+            results.add(DartPackageInfo(name: line));
           }
         }
-        return results.join(' ');
+        return results;
       }
     } else {
       final query = argResults.arguments.firstWhere(
@@ -56,7 +70,7 @@ class AutocompleteCommand extends CliCommand<dynamic> {
         orElse: () => 'a',
       );
       final packages = await getPackages(query);
-      return packages.map((e) => e.name).join(' ');
+      return packages;
     }
   }
 }
