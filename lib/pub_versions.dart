@@ -128,6 +128,13 @@ Future<List<DartPackageInfo>> getPackages(String query) async {
   }).toList();
 }
 
+String? sanitizeJson(String? string) {
+  if (string == null) return null;
+  // Invalid string: control characters from U+0000 through U+001F must be escaped at line 2, column 1
+
+  return string.replaceAll(RegExp(r'\n\t\r'), ' ');
+}
+
 Future<List<String>> fetchPackageList() async {
   final responses = await http
       .get(Uri.parse('https://pub.dev/api/package-name-completion-data'));
@@ -159,6 +166,7 @@ class DartPackageInfo {
       if (author != null) 'author': this.author,
       if (recentVersion != null) 'recentVersion': this.recentVersion,
       'likes': this.likes,
-    };
+    }.map((key, value) =>
+        MapEntry(key, value is String ? sanitizeJson(value) : value));
   }
 }
