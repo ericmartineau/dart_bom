@@ -67,7 +67,7 @@ abstract class CliCommand<R> extends Command<R> {
   FutureOr<R> run() async {
     final isVerbose = globalResults?['verbose'] == true;
     final log = CliLogger(
-      isVerbose ? Logger.verbose() : Logger.standard(),
+      logger: isVerbose ? Logger.verbose() : Logger.standard(),
     );
 
     return internalRun(log, isVerbose, argResults);
@@ -80,7 +80,7 @@ abstract class CliCommand<R> extends Command<R> {
     try {
       argResults = argParser.parse(args);
     } catch (e) {
-      final log = CliLogger(Logger.standard());
+      final log = CliLogger(logger: Logger.standard());
 
       if (e is ArgParserException) {
         log.error('${e.message}', label: false);
@@ -95,7 +95,7 @@ abstract class CliCommand<R> extends Command<R> {
 
     var isVerbose = argResults['verbose'] == true;
     final log = CliLogger(
-      isVerbose ? Logger.verbose() : Logger.standard(),
+      logger: isVerbose ? Logger.verbose() : Logger.standard(),
     );
     await internalRun(log, isVerbose, argResults);
   }

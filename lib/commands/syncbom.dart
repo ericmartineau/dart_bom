@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:cli_util/cli_logging.dart';
+import 'package:dart_bom/common/logging.dart';
 import 'package:dart_bom/dart_bom.dart';
 
 Future main(List<String> arguments) {
   final ArgParser argParser = ArgParser();
-
+  final logger = CliLogger(logger: Logger.standard());
   argParser.addOption("source", abbr: "s", help: 'The path to the source file');
   argParser.addOption("target",
       abbr: "t",
@@ -51,7 +53,7 @@ Future main(List<String> arguments) {
     print('The destination file pubspec.yaml does not exist');
     exit(1);
   }
-  return syncPubspecFiles(options).catchError((e, stack) {
+  return syncPubspecFiles(logger, options).catchError((e, stack) {
     if (e is DartBomException) {
       print(e.message);
       exit(e.exitCode);

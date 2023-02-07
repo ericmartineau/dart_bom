@@ -33,7 +33,7 @@ Future main(List<String> arguments) async {
     repos: repos,
     workingDirectory: targetRepos.parent.path,
   );
-  final logger = CliLogger(Logger.standard());
+  final logger = CliLogger(logger: Logger.standard());
 
   await checkoutLocal(options, logger);
 }
