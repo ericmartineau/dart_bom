@@ -1,3 +1,8 @@
+## 1.12.0
+
+ - **FEAT**: Additional commands:.
+ - **FEAT**: Update to 1.11:.
+
 ## 1.11.0
 
  - **FIX**: Handle none.

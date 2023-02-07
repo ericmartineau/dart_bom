@@ -1,5 +1,5 @@
 name: dart_bom
-version: 1.11.0
+version: 1.12.0
 homepage: https://github.com/ericmartineau/dart_bom.git
 description: A utility for syncing dependencies across projects from a bill-of-materials pubspec
 environment:
