@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.0"
+  completion:
+    dependency: "direct main"
+    description:
+      name: completion
+      sha256: f11b7a628e6c42b9edc9b0bc3aa490e2d930397546d2f794e8e1325909d11c60
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   convert:
     dependency: transitive
     description:

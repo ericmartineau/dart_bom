@@ -108,6 +108,13 @@ Future<List<PackageInfo>> getPackages(String query) async {
   }).toList();
 }
 
+Future<List<String>> fetchPackageList() async {
+  final responses = await http
+      .get(Uri.parse('https://pub.dev/api/package-name-completion-data'));
+  final json = jsonDecode(responses.body);
+  return (json['packages'] as List).cast<String>();
+}
+
 class PackageInfo {
   final String? name;
   final String? description;

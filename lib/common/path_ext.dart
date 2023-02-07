@@ -13,6 +13,13 @@ extension DirectoryChildren on Directory {
     return Directory(join(path, name));
   }
 
+  String resolvePath(String path) {
+    if (path.contains('~')) {
+      path = path.replaceAll('~', userHomePath!);
+    }
+    return path;
+  }
+
   File child(String name) {
     return File(join(path, name));
   }
@@ -46,4 +53,16 @@ class ParentFilter {
   final List<String> path;
 
   ParentFilter(this.found, this.path);
+}
+
+String? get userHomePath {
+  var envVars = Platform.environment;
+  if (Platform.isMacOS) {
+    return envVars['HOME'];
+  } else if (Platform.isLinux) {
+    return envVars['HOME'];
+  } else if (Platform.isWindows) {
+    return envVars['UserProfile'];
+  }
+  return null;
 }

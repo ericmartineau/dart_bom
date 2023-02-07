@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
+import 'package:completion/completion.dart';
 import 'package:dart_bom/common/logging.dart';
 
 typedef CliCommandExec<R> = FutureOr<R> Function(
@@ -50,7 +51,7 @@ abstract class CliCommand<R> extends Command<R> {
       if (logged != null) {
         log.log(logged);
       }
-      return res!;
+      return res as R;
     } on ArgumentError catch (e) {
       log.error('Unexpected error: ${e}');
       log.error(argParser.usage, label: false);
@@ -78,14 +79,13 @@ abstract class CliCommand<R> extends Command<R> {
   Future<void> bootstrap(List<String> args) async {
     ArgResults? argResults;
     try {
-      argResults = argParser.parse(args);
+      argResults = tryArgsCompletion(args, argParser);
     } catch (e) {
       final log = CliLogger(logger: Logger.standard());
 
       if (e is ArgParserException) {
         log.error('${e.message}', label: false);
         log.error('', label: false);
-        log.flush();
       } else {
         log.error('Error parsing args: $e', label: false);
       }

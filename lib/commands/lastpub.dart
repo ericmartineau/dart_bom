@@ -8,7 +8,7 @@ import 'package:dart_bom/pub_versions.dart';
 
 class LastVersionCommand extends CliCommand<dynamic> {
   @override
-  FutureOr<dynamic?> execute(CliLogger logger, ArgResults? argResults) {
+  FutureOr<dynamic> execute(CliLogger logger, ArgResults? argResults) {
     var options = DartVersionOptions.resolve(argResults?.get('source'));
     return getLastPublishedVersion(options);
   }

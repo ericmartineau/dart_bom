@@ -15,13 +15,20 @@ class ListPubVersions extends CliCommand<dynamic> {
               ..addOption("source",
                   abbr: "s",
                   help: 'The path to a pubspec file, or a package name',
-                  mandatory: defaultToDir == false,
+                  mandatory: false,
                   defaultsTo: defaultToDir ? './pubspec.yaml' : null));
 
   @override
   FutureOr<List<Version>?> execute(CliLogger logger, ArgResults? argResults) {
     return getPublishedVersions(
-        DartVersionOptions.resolve(argResults?['source']));
+      DartVersionOptions.resolve(
+        argResults?['source'] ??
+            argResults?.arguments.firstWhere(
+              (element) => true,
+              orElse: () => '',
+            ),
+      ),
+    );
   }
 
   @override
