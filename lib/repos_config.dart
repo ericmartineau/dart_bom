@@ -67,11 +67,6 @@ class PackageCheckoutConfig extends Equatable {
             'the git property must match a pubspec git definition',
           );
         }
-      } else {
-        throw StateError(
-          'Invalid configuration for package $key: '
-          'the git property is required',
-        );
       }
 
       if (versionConfig is String) {

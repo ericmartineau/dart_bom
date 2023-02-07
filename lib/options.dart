@@ -54,6 +54,9 @@ class DartReposOptions {
 class DartBomOptions {
   final String? _source;
   final String target;
+
+  /// Whether to write project dependencies into an overrides file
+  final bool useOverrideFile;
   final bool writeFiles;
   final bool overwritePathDependencies;
   final bool overwriteDependencyOverrides;
@@ -62,6 +65,7 @@ class DartBomOptions {
   const DartBomOptions(
       {String? source,
       this.target = './pubspec.yaml',
+      this.useOverrideFile = true,
       this.writeFiles = false,
       this.backupFiles = true,
       this.overwritePathDependencies = false,
@@ -77,9 +81,32 @@ class DartBomOptions {
       '-t',
       target,
       if (writeFiles) '-w',
+      if (useOverrideFile) '-f',
       if (overwritePathDependencies) '-p',
       if (overwriteDependencyOverrides) '-o',
       if (!backupFiles) '-b',
     ].join(' ');
+  }
+
+  DartBomOptions copyWith({
+    String? source,
+    String? target,
+    bool? writeFiles,
+    bool? overwritePathDependencies,
+    bool? overwriteDependencyOverrides,
+    bool? backupFiles,
+    bool? useOverrideFile,
+  }) {
+    return DartBomOptions(
+      source: source ?? this._source,
+      useOverrideFile: useOverrideFile ?? this.useOverrideFile,
+      target: target ?? this.target,
+      writeFiles: writeFiles ?? this.writeFiles,
+      overwritePathDependencies:
+          overwritePathDependencies ?? this.overwritePathDependencies,
+      overwriteDependencyOverrides:
+          overwriteDependencyOverrides ?? this.overwriteDependencyOverrides,
+      backupFiles: backupFiles ?? this.backupFiles,
+    );
   }
 }

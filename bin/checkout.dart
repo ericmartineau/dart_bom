@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:cli_util/cli_logging.dart';
 import 'package:dart_bom/checkout_local.dart';
 import 'package:dart_bom/common/logging.dart';
 import 'package:dart_bom/dart_bom.dart';
@@ -15,6 +14,12 @@ Future main(List<String> arguments) async {
     abbr: "h",
     help: 'Shows help info',
   );
+  argParser.addFlag(
+    "verbose",
+    abbr: "v",
+    help: 'Verbose loggings',
+  );
+
   var args = argParser.parse(arguments);
 
   if (args['help'] == true) {
@@ -33,7 +38,7 @@ Future main(List<String> arguments) async {
     repos: repos,
     workingDirectory: targetRepos.parent.path,
   );
-  final logger = CliLogger(Logger.standard());
+  final logger = CliLogger.of(verbose: args['verbose'] == true);
 
   await checkoutLocal(options, logger);
 }

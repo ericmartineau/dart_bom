@@ -17,6 +17,7 @@
 
 import 'dart:io';
 
+import 'package:dart_bom/common/logging.dart';
 import 'package:path/path.dart';
 
 import '../common/io.dart';
@@ -27,14 +28,12 @@ enum TagReleaseType {
   stable,
 }
 
-typedef LogFn = void Function(String str);
-void _logNone(String str) {}
-
 class GitClient {
   final String workingDirectory;
-  final LogFn logger;
+  final CliLogger logger;
 
-  const GitClient(this.workingDirectory, [this.logger = _logNone]);
+  GitClient(this.workingDirectory, [CliLogger? logger])
+      : logger = logger ?? CliLogger();
 
   /// Generate a filter pattern for a package name, useful for listing tags for a
   /// package.
@@ -65,7 +64,7 @@ class GitClient {
   }) async {
     const executable = 'git';
 
-    logger(
+    logger.trace(
       '[GIT] Executing command `$executable ${arguments.join(' ')}` '
       'in directory `$workingDirectory`.',
     );
@@ -277,7 +276,7 @@ class GitClient {
     final aheadCount = leftRightCounts[1];
     final isBehind = behindCount > 0;
 
-    logger(
+    logger.trace(
       '[GIT] Local branch `$localBranch` is behind remote branch `$remoteBranch` '
       'by $behindCount commit(s) and ahead by $aheadCount.',
     );
