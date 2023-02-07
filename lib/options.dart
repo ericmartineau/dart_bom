@@ -1,11 +1,42 @@
 import 'package:dart_bom/repos_config.dart';
+import 'package:path/path.dart';
+
+import 'dart_bom_ext.dart';
 
 class DartVersionOptions {
   final String source;
   final bool published;
+  final bool isPackageName;
 
   const DartVersionOptions(
-      {this.source = './pubspec.yaml', this.published = false});
+      {this.source = './pubspec.yaml',
+      this.published = false,
+      this.isPackageName = false});
+
+  const DartVersionOptions.forPackage(
+    this.source, {
+    this.published = true,
+  }) : isPackageName = true;
+
+  factory DartVersionOptions.resolve(
+    Object? sourceParamAny, {
+    bool allowPubName = true,
+  }) {
+    String? sourceParam = sourceParamAny?.toString();
+    var targetPubspec = resolvePubspec(sourceParam);
+    if (!targetPubspec.existsSync()) {
+      if (sourceParam != null && !sourceParam.contains(separator)) {
+        // Treat as a pub.dev
+        return DartVersionOptions.forPackage(sourceParam);
+      } else {
+        throw ArgumentError(
+            'The source file ${targetPubspec.absolute.path} does not exist',
+            'source');
+      }
+    } else {
+      return DartVersionOptions(source: targetPubspec.absolute.path);
+    }
+  }
 }
 
 class DartReposOptions {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:html/dom.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:http/http.dart' as http;
@@ -58,15 +59,38 @@ Future<List<Version>> getPublishedVersionsForPackage(String packageName,
 
 Future<List<Version>> getPublishedVersions(
     [DartVersionOptions options = const DartVersionOptions()]) async {
-  if (!File(options.source).existsSync()) {
-    throw DartBomException('File ${options.source} does not exist', 2);
+  if (!options.isPackageName) {
+    if (!File(options.source).existsSync()) {
+      throw DartBomException('File ${options.source} does not exist', 2);
+    }
+    var pubspec = await PubSpec.loadFile(options.source);
+    var name = pubspec.name!;
+    Uri? pubHosted = pubspec.publishTo;
+    if (pubHosted?.hasScheme != true) {
+      pubHosted = pubUrl;
+    }
+    return await getPublishedVersionsForPackage(name, publishedTo: pubHosted);
+  } else {
+    return await getPublishedVersionsForPackage(
+      options.source,
+      publishedTo: pubUrl,
+    );
   }
-  var pubspec = await PubSpec.loadFile(options.source);
-  var name = pubspec.name!;
-  Uri? pubHosted = pubspec.publishTo;
-  if (pubHosted?.hasScheme != true) {
-    pubHosted = pubUrl;
-  }
+}
 
-  return await getPublishedVersionsForPackage(name, publishedTo: pubHosted);
+Future<List<String>> getPackages(String query) async {
+  final responses = await Future.wait([1, 2].map((page) => http.get(Uri.parse(
+      'https://pub.dev/packages?page=$page&q=${Uri.encodeComponent(query)}'))));
+  return responses.expand((e) {
+    var found = Document.html(e.body);
+    final packages = found.getElementsByClassName('packages-title');
+    return packages
+        .map((e) {
+          return e.firstChild?.text;
+        })
+        .where((element) =>
+            element != null &&
+            element.toLowerCase().contains(query.toLowerCase()))
+        .whereType<String>();
+  }).toList();
 }

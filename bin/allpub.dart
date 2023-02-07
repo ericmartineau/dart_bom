@@ -1,40 +1,10 @@
-import 'dart:io';
+import 'package:dart_bom/commands/list_pub_versions.dart';
+import 'package:dart_bom/common/cli_command.dart';
 
-import 'package:args/args.dart';
-import 'package:dart_bom/dart_bom.dart';
-import 'package:dart_bom/pub_versions.dart';
+// ALl
 
 Future main(List<String> arguments) {
-  final ArgParser argParser = ArgParser();
-
-  argParser.addOption("source",
-      abbr: "s",
-      help: 'The path to a pubspec file',
-      defaultsTo: './pubspec.yaml');
-  argParser.addFlag(
-    "help",
-    abbr: "h",
-    help: 'Shows help info',
-  );
-  var args = argParser.parse(arguments);
-
-  if (args['help'] == true) {
-    print(argParser.usage);
-    exit(1);
-  }
-
-  if (args['source'] == null) {
-    print('You must provide a source file');
-    exit(1);
-  }
-
-  var targetPubspec = resolvePubspec(args.get('source'));
-  if (!targetPubspec.existsSync()) {
-    print('The source file ${targetPubspec.absolute.path} does not exist');
-    exit(1);
-  }
-  var options = DartVersionOptions(source: targetPubspec.absolute.path);
-  return getPublishedVersions(options).then((list) {
-    list.forEach(print);
-  });
+  var cmd = ListPubVersions(name: 'allpub', defaultToDir: false)
+    ..argParser.addVerboseFlag();
+  return cmd.bootstrap(arguments);
 }
