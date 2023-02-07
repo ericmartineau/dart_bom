@@ -78,19 +78,57 @@ Future<List<Version>> getPublishedVersions(
   }
 }
 
-Future<List<String>> getPackages(String query) async {
+Future<List<PackageInfo>> getPackages(String query) async {
   final responses = await Future.wait([1, 2].map((page) => http.get(Uri.parse(
       'https://pub.dev/packages?page=$page&q=${Uri.encodeComponent(query)}'))));
   return responses.expand((e) {
     var found = Document.html(e.body);
-    final packages = found.getElementsByClassName('packages-title');
-    return packages
-        .map((e) {
-          return e.firstChild?.text;
-        })
-        .where((element) =>
-            element != null &&
-            element.toLowerCase().contains(query.toLowerCase()))
-        .whereType<String>();
+    final packages = found.getElementsByClassName('packages-item');
+
+    String? getText(Element source, String className) {
+      final found = source.getElementsByClassName(className);
+      if (found.isNotEmpty) {
+        return found.first.text;
+      } else {
+        return null;
+      }
+    }
+
+    return packages.map((e) {
+      return PackageInfo(
+        getText(e, 'packages-title'),
+        getText(e, 'packages-description'),
+        null,
+        int.tryParse(getText(e, 'packages-score-value-number') ?? '0'),
+        [],
+      );
+    }).where((element) =>
+        element.name != null &&
+        element.name!.toLowerCase().contains(query.toLowerCase()));
   }).toList();
+}
+
+class PackageInfo {
+  final String? name;
+  final String? description;
+  final String? author;
+  final int? likes;
+  final List<String>? platforms;
+
+  PackageInfo(
+    this.name,
+    this.description,
+    this.author,
+    this.likes,
+    this.platforms,
+  );
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (name != null) 'name': this.name,
+      if (description != null) 'description': this.description,
+      if (author != null) 'author': this.author,
+      'likes': this.likes,
+    };
+  }
 }
