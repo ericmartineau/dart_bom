@@ -1,3 +1,7 @@
+## 1.13.0
+
+ - **FEAT**: Update autocomplete.
+
 ## 1.12.0
 
  - **FEAT**: Additional commands:.
